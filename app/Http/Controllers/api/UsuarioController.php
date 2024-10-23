@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Usuario;
+use App\Http\Resources\UsuarioResource;
 use Illuminate\Http\Request;
 
 class UsuarioController extends Controller
@@ -13,7 +14,8 @@ class UsuarioController extends Controller
      */
     public function index()
     {
-        //
+        $usuarios = Usuario::all();
+        return response()->json($usuarios, 200);
     }
 
     /**
@@ -36,8 +38,16 @@ class UsuarioController extends Controller
      */
     public function show(string $id)
     {
+        // $result = Usuario::with('perfil')->findOrFail($id);
         $result = Usuario::findOrFail($id);
-        return response()->json($result, 200);
+        // return response()->json(new UsuarioResource($result), 200);
+        return response()->json($result,200);
+    }
+
+    public function showPerfil(string $id)
+    {
+        $result = Usuario::findOrFail($id);
+        return response()->json($result->perfil, 200);
     }
 
     /**
@@ -45,7 +55,16 @@ class UsuarioController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255'
+        ]);
+
+        $usuario = Usuario::findOrFail($id);
+        $usuario->update($data);
+
+        return response()->json($usuario, 201);
+
     }
 
     /**
@@ -53,6 +72,9 @@ class UsuarioController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $usuario = Usuario::findOrFail($id);
+        $usuario->delete();
+
+        return response()->json($usuario, 204);
     }
 }
